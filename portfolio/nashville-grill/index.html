@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoky Roots BBQ — Nashville's Finest Southern BBQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --charcoal: #1a1210;
+  --dark-wood: #2c1e15;
+  --warm-brown: #4a3228;
+  --amber: #d4871c;
+  --amber-light: #e9a84c;
+  --cream: #f5efe6;
+  --smoke: #8b7d6b;
+  --rust: #a0522d;
+  --gold: #c9a84c;
+  --text-light: #f5efe6;
+  --text-dark: #2c1e15;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: var(--text-dark);
+  background: var(--cream);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+
+/* NAVBAR */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(26, 18, 16, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 70px;
+  transition: box-shadow 0.3s;
+}
+.navbar.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.4); }
+.navbar-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--amber);
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.navbar-brand span { color: var(--cream); font-weight: 400; }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  color: var(--cream); text-decoration: none; font-size: 0.85rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+  transition: color 0.3s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px; background: var(--amber);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--amber); }
+.nav-links a:hover::after { width: 100%; }
+
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; background: none; border: none; padding: 5px;
+}
+.hamburger span {
+  width: 25px; height: 2px; background: var(--cream);
+  transition: 0.3s;
+}
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; position: relative;
+  background: linear-gradient(135deg, #1a1210 0%, #3d2416 30%, #5a3020 50%, #3d2416 70%, #1a1210 100%);
+  overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(212,135,28,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(160,82,45,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(0,0,0,0.3) 0%, transparent 60%);
+}
+.hero::after {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4871c' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; padding: 2rem; }
+.hero-tagline {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.9rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 4px;
+  color: var(--amber); margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  color: var(--cream); line-height: 1.1;
+  margin-bottom: 1.5rem; font-weight: 900;
+}
+.hero h1 em {
+  font-style: italic; color: var(--amber);
+  display: block; font-size: 0.6em;
+  font-weight: 400; margin-top: 0.3em;
+}
+.hero p {
+  font-size: 1.15rem; color: rgba(245,239,230,0.8);
+  max-width: 550px; margin: 0 auto 2.5rem; line-height: 1.7;
+}
+.hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-block; padding: 1rem 2.5rem;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  text-decoration: none; border-radius: 4px;
+  transition: all 0.3s; cursor: pointer; border: none;
+}
+.btn-primary {
+  background: var(--amber); color: var(--charcoal);
+}
+.btn-primary:hover { background: var(--amber-light); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,135,28,0.4); }
+.btn-outline {
+  background: transparent; color: var(--cream);
+  border: 2px solid rgba(245,239,230,0.4);
+}
+.btn-outline:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-2px); }
+
+.scroll-indicator {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  z-index: 1; animation: bounce 2s infinite;
+}
+.scroll-indicator span {
+  display: block; width: 24px; height: 24px;
+  border-right: 2px solid var(--amber); border-bottom: 2px solid var(--amber);
+  transform: rotate(45deg); opacity: 0.6;
+}
+@keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+
+/* SECTIONS */
+section { padding: 6rem 2rem; }
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-header h2 {
+  font-size: clamp(2rem, 4vw, 3rem); color: var(--dark-wood);
+  margin-bottom: 1rem;
+}
+.section-header .divider {
+  width: 60px; height: 3px; background: var(--amber);
+  margin: 1rem auto; border-radius: 2px;
+}
+.section-header p { color: var(--smoke); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+/* ABOUT */
+.about { background: var(--cream); }
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; max-width: 1100px; margin: 0 auto; align-items: center;
+}
+.about-image {
+  height: 500px; border-radius: 12px;
+  background: linear-gradient(145deg, #3d2416, #5a3020, #4a3228, #2c1e15);
+  position: relative; overflow: hidden;
+}
+.about-image::after {
+  content: '🔥'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); font-size: 5rem; opacity: 0.3;
+}
+.about-text h3 {
+  font-size: 2rem; color: var(--dark-wood); margin-bottom: 1.5rem;
+}
+.about-text p { color: #5a4a3a; line-height: 1.8; margin-bottom: 1.2rem; }
+.about-text .signature {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 1.3rem; color: var(--amber); margin-top: 1.5rem;
+}
+
+/* MENU */
+.menu { background: var(--dark-wood); color: var(--cream); }
+.menu .section-header h2 { color: var(--cream); }
+.menu .section-header p { color: rgba(245,239,230,0.6); }
+.menu-tabs {
+  display: flex; justify-content: center; gap: 0.5rem;
+  margin-bottom: 3rem; flex-wrap: wrap;
+}
+.menu-tab {
+  padding: 0.7rem 1.8rem; border: 1px solid rgba(245,239,230,0.2);
+  background: transparent; color: var(--cream); cursor: pointer;
+  font-family: 'Open Sans', sans-serif; font-size: 0.8rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+  border-radius: 4px; transition: all 0.3s;
+}
+.menu-tab.active, .menu-tab:hover {
+  background: var(--amber); color: var(--charcoal); border-color: var(--amber);
+}
+.menu-category { display: none; }
+.menu-category.active { display: block; }
+.menu-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem; max-width: 1000px; margin: 0 auto;
+}
+.menu-item {
+  padding: 1.5rem; background: rgba(255,255,255,0.05);
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.3s, background 0.3s;
+}
+.menu-item:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+.menu-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+.menu-item h4 { font-size: 1.1rem; color: var(--cream); }
+.menu-item .price { font-weight: 700; color: var(--amber); font-size: 1.1rem; }
+.menu-item p { font-size: 0.85rem; color: rgba(245,239,230,0.5); line-height: 1.6; }
+.menu-item .tag {
+  display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.6rem;
+  background: rgba(212,135,28,0.2); color: var(--amber);
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; border-radius: 3px;
+}
+
+/* GALLERY */
+.gallery { background: var(--cream); }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 250px;
+  gap: 1rem; max-width: 1100px; margin: 0 auto;
+}
+.gallery-item {
+  border-radius: 10px; overflow: hidden;
+  position: relative; cursor: pointer;
+  transition: transform 0.4s;
+}
+.gallery-item:hover { transform: scale(1.02); }
+.gallery-item:nth-child(1) { grid-row: span 2; background: linear-gradient(135deg, #5a3020, #d4871c, #a0522d); }
+.gallery-item:nth-child(2) { background: linear-gradient(135deg, #2c1e15, #4a3228, #8b7d6b); }
+.gallery-item:nth-child(3) { background: linear-gradient(135deg, #a0522d, #c9a84c, #d4871c); }
+.gallery-item:nth-child(4) { background: linear-gradient(135deg, #3d2416, #5a3020, #8b7d6b); }
+.gallery-item:nth-child(5) { grid-column: span 2; background: linear-gradient(135deg, #1a1210, #4a3228, #d4871c, #a0522d); }
+.gallery-item:nth-child(6) { background: linear-gradient(135deg, #c9a84c, #a0522d, #5a3020); }
+.gallery-item::after {
+  content: attr(data-label);
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1.5rem; font-family: 'Playfair Display', serif;
+  font-size: 1rem; color: white; font-weight: 700;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+}
+
+/* TESTIMONIALS */
+.testimonials { background: var(--warm-brown); color: var(--cream); }
+.testimonials .section-header h2 { color: var(--cream); }
+.testimonials .section-header p { color: rgba(245,239,230,0.6); }
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; max-width: 1100px; margin: 0 auto;
+}
+.testimonial-card {
+  background: rgba(255,255,255,0.06); padding: 2rem;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+}
+.stars { color: var(--amber); font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px; }
+.testimonial-card blockquote {
+  font-style: italic; line-height: 1.7;
+  color: rgba(245,239,230,0.85); margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+.testimonial-author { display: flex; align-items: center; gap: 1rem; }
+.author-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber), var(--rust));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem; color: var(--charcoal);
+}
+.author-info .name { font-weight: 600; font-size: 0.9rem; }
+.author-info .source { font-size: 0.75rem; color: rgba(245,239,230,0.5); }
+
+/* HOURS & LOCATION */
+.location { background: var(--cream); }
+.location-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; max-width: 1000px; margin: 0 auto;
+}
+.hours-card, .address-card {
+  padding: 2.5rem; background: white; border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(44,30,21,0.08);
+}
+.hours-card h3, .address-card h3 {
+  font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--dark-wood);
+}
+.hours-row {
+  display: flex; justify-content: space-between;
+  padding: 0.7rem 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 0.95rem;
+}
+.hours-row:last-child { border: none; }
+.hours-row .day { font-weight: 600; color: var(--dark-wood); }
+.hours-row .time { color: var(--smoke); }
+.address-card p { line-height: 1.8; color: #5a4a3a; margin-bottom: 1rem; }
+.address-card .contact-line { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.8rem; }
+.address-card .icon { color: var(--amber); font-size: 1.1rem; width: 24px; text-align: center; }
+.map-placeholder {
+  width: 100%; height: 200px; margin-top: 1.5rem;
+  background: linear-gradient(135deg, #ddd5c8, #c9bfae);
+  border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; color: var(--smoke); font-size: 0.85rem;
+}
+
+/* CONTACT CTA */
+.contact-cta {
+  background: linear-gradient(135deg, var(--charcoal), var(--dark-wood));
+  text-align: center; color: var(--cream);
+}
+.contact-cta h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+.contact-cta p { color: rgba(245,239,230,0.7); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+.contact-methods { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+.contact-method {
+  text-align: center; padding: 1.5rem 2rem;
+  background: rgba(255,255,255,0.05); border-radius: 10px;
+  min-width: 200px;
+}
+.contact-method .icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+.contact-method .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(245,239,230,0.5); margin-bottom: 0.3rem; }
+.contact-method .value { color: var(--amber); font-weight: 600; }
+.contact-method a { color: var(--amber); text-decoration: none; }
+
+/* FOOTER */
+footer {
+  background: var(--charcoal); color: rgba(245,239,230,0.4);
+  text-align: center; padding: 3rem 2rem;
+  font-size: 0.85rem;
+}
+footer .footer-brand {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  color: var(--amber); margin-bottom: 1rem;
+}
+footer .social { display: flex; gap: 1.5rem; justify-content: center; margin: 1.5rem 0; }
+footer .social a {
+  color: rgba(245,239,230,0.4); text-decoration: none;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+  transition: color 0.3s;
+}
+footer .social a:hover { color: var(--amber); }
+footer p { margin-top: 1rem; }
+footer .demo-badge {
+  display: inline-block; margin-top: 1.5rem; padding: 0.4rem 1rem;
+  background: rgba(212,135,28,0.15); color: var(--amber);
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px;
+  border-radius: 3px;
+}
+
+/* ANIMATIONS */
+.fade-up {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .nav-links { display: none; position: absolute; top: 70px; left: 0; right: 0; background: rgba(26,18,16,0.98); flex-direction: column; padding: 2rem; gap: 1.5rem; }
+  .nav-links.open { display: flex; }
+  .hamburger { display: flex; }
+  .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .about-image { height: 300px; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 200px; }
+  .gallery-item:nth-child(1) { grid-row: span 1; }
+  .gallery-item:nth-child(5) { grid-column: span 1; }
+  .location-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .menu-grid { grid-template-columns: 1fr; }
+  section { padding: 4rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="#" class="navbar-brand">SMOKY ROOTS <span>BBQ</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">About</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#location">Visit</a></li>
+    <li><a href="#contact" class="btn btn-primary" style="padding:0.5rem 1.5rem; font-size:0.75rem;">Order Now</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <p class="hero-tagline">Nashville's Smokehouse Since 2014</p>
+    <h1>Low &amp; Slow,<br>Bold &amp; True<em>Real pit-smoked BBQ</em></h1>
+    <p>Hickory-smoked meats, handcrafted sides, and Southern hospitality — the way it's been done for generations on Music Row.</p>
+    <div class="hero-buttons">
+      <a href="#menu" class="btn btn-primary">View Our Menu</a>
+      <a href="#contact" class="btn btn-outline">Order Now</a>
+    </div>
+  </div>
+  <div class="scroll-indicator"><span></span></div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-grid">
+    <div class="about-image fade-up"></div>
+    <div class="about-text fade-up">
+      <h3>Born in Nashville,<br>Raised on Smoke</h3>
+      <p>Smoky Roots BBQ started with a simple belief: great barbecue doesn't need shortcuts. In 2014, pitmaster Marcus "Big M" Calloway fired up his first offset smoker in a converted garage on Dickerson Pike with nothing but family recipes and a whole lot of patience.</p>
+      <p>Every brisket is smoked for 14 hours over Tennessee hickory. Every sauce is made from scratch — our signature Smoky Roots Red blends brown sugar, apple cider vinegar, and just enough cayenne to remind you where you are. We cure our own bacon, pickle our own okra, and bake our cornbread in cast iron.</p>
+      <p>What started as weekend pop-ups at the Nashville Farmers' Market grew into the brick-and-mortar you know today — a place where families gather, live blues fills the room, and every plate tells a story.</p>
+      <p class="signature">— Marcus &amp; Diane Calloway, Founders</p>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu" id="menu">
+  <div class="section-header">
+    <h2>Our Menu</h2>
+    <div class="divider"></div>
+    <p>Smoked daily, served with pride. All meats smoked in-house over Tennessee hickory and cherry wood.</p>
+  </div>
+  <div class="menu-tabs">
+    <button class="menu-tab active" data-tab="appetizers">Appetizers</button>
+    <button class="menu-tab" data-tab="mains">Mains</button>
+    <button class="menu-tab" data-tab="sides">Sides</button>
+    <button class="menu-tab" data-tab="drinks">Drinks</button>
+  </div>
+
+  <div class="menu-category active" id="appetizers">
+    <div class="menu-grid">
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Smoked Wings</h4><span class="price">$14</span></div>
+        <p>Dry-rubbed and smoked, tossed in Nashville hot or honey bourbon glaze. Served with ranch.</p>
+        <span class="tag">Fan Favorite</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Fried Pickles</h4><span class="price">$9</span></div>
+        <p>Hand-battered dill pickle chips, golden fried. Served with smoky chipotle aioli.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Pimento Cheese Dip</h4><span class="price">$11</span></div>
+        <p>House-made pimento cheese with roasted jalapeños, served warm with cracklins and toast points.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Burnt End Bites</h4><span class="price">$13</span></div>
+        <p>Crispy cubed brisket burnt ends glazed in sweet KC-style sauce. Addictively good.</p>
+        <span class="tag">Staff Pick</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Loaded Nachos</h4><span class="price">$15</span></div>
+        <p>Tortilla chips loaded with pulled pork, queso, pickled onions, jalapeños, and Smoky Roots Red sauce.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Smoked Sausage Board</h4><span class="price">$16</span></div>
+        <p>Three house-made sausages — jalapeño cheddar, andouille, and maple sage — with mustard and pickles.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-category" id="mains">
+    <div class="menu-grid">
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>The Brisket Plate</h4><span class="price">$24</span></div>
+        <p>14-hour smoked beef brisket, sliced to order. Served with two sides and Texas toast.</p>
+        <span class="tag">Signature</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Pulled Pork Sandwich</h4><span class="price">$16</span></div>
+        <p>Slow-smoked pork shoulder piled on a brioche bun with vinegar slaw and pickles.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Nashville Hot Rib Tips</h4><span class="price">$19</span></div>
+        <p>Smoky rib tips tossed in our Nashville hot spice blend. Comes with white bread and pickles.</p>
+        <span class="tag">Spicy</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Full Rack St. Louis Ribs</h4><span class="price">$28</span></div>
+        <p>Dry-rubbed, smoked 5 hours, finished with a caramelized bourbon glaze. Two sides included.</p>
+        <span class="tag">Fan Favorite</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Smoked Half Chicken</h4><span class="price">$18</span></div>
+        <p>Brined overnight, smoked over cherry wood. Crispy skin, juicy inside. With two sides.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>The Big Smoke Combo</h4><span class="price">$34</span></div>
+        <p>Brisket, pulled pork, ribs, and a smoked sausage link. Served with three sides and cornbread.</p>
+        <span class="tag">For the Hungry</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-category" id="sides">
+    <div class="menu-grid">
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Cast Iron Cornbread</h4><span class="price">$5</span></div>
+        <p>Honey butter cornbread baked fresh in cast iron. Just like grandma made.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Smoked Mac &amp; Cheese</h4><span class="price">$7</span></div>
+        <p>Three-cheese blend with a smoky breadcrumb crust. Creamy, cheesy, perfect.</p>
+        <span class="tag">Fan Favorite</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Collard Greens</h4><span class="price">$6</span></div>
+        <p>Slow-braised with smoked turkey necks, apple cider vinegar, and a kick of red pepper.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Baked Beans</h4><span class="price">$6</span></div>
+        <p>Smoky, sweet, loaded with burnt ends and brown sugar. A BBQ essential.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Vinegar Slaw</h4><span class="price">$5</span></div>
+        <p>Tangy Carolina-style coleslaw. Light, crisp, and the perfect balance to rich meats.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Fried Okra</h4><span class="price">$6</span></div>
+        <p>Cornmeal-crusted and fried crispy. Served with buttermilk dipping sauce.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-category" id="drinks">
+    <div class="menu-grid">
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Sweet Tea</h4><span class="price">$3</span></div>
+        <p>The real deal. Brewed strong and sweetened right. Free refills, always.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>House Lemonade</h4><span class="price">$4</span></div>
+        <p>Fresh-squeezed with a hint of mint. Add bourbon for $5 more.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Smoky Roots Amber Ale</h4><span class="price">$7</span></div>
+        <p>Brewed exclusively for us by a local Nashville craft brewery. Malty and smooth.</p>
+        <span class="tag">House Brew</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Bourbon Flight</h4><span class="price">$18</span></div>
+        <p>Four Tennessee and Kentucky bourbons, hand-selected by our bar team.</p>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Peach Cobbler Milkshake</h4><span class="price">$8</span></div>
+        <p>Vanilla custard blended with house peach cobbler and cinnamon. Dessert in a glass.</p>
+        <span class="tag">Seasonal</span>
+      </div>
+      <div class="menu-item fade-up">
+        <div class="menu-item-header"><h4>Arnold Palmer</h4><span class="price">$4</span></div>
+        <p>Half sweet tea, half lemonade. Simple. Perfect.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="gallery">
+  <div class="section-header">
+    <h2>From Our Kitchen</h2>
+    <div class="divider"></div>
+    <p>A peek behind the smoke — our kitchen, our people, our food.</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item fade-up" data-label="Brisket on the Smoker"></div>
+    <div class="gallery-item fade-up" data-label="The Dining Room"></div>
+    <div class="gallery-item fade-up" data-label="Nashville Hot Wings"></div>
+    <div class="gallery-item fade-up" data-label="Pitmaster at Work"></div>
+    <div class="gallery-item fade-up" data-label="The Big Smoke Combo Plate"></div>
+    <div class="gallery-item fade-up" data-label="Live Blues Fridays"></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="section-header">
+    <h2>What Folks Are Saying</h2>
+    <div class="divider"></div>
+    <p>Don't just take our word for it.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Best brisket in Nashville, and I don't say that lightly. The bark, the smoke ring, the tenderness — absolute perfection. We drive 45 minutes just for the burnt end bites."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">J</div>
+        <div class="author-info">
+          <div class="name">James T.</div>
+          <div class="source">Google Reviews</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Came for the food, stayed for the vibe. Live blues on Friday, the friendliest staff in town, and mac &amp; cheese that should be illegal. This place is Nashville at its best."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">S</div>
+        <div class="author-info">
+          <div class="name">Sarah M.</div>
+          <div class="source">Yelp</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <blockquote>"As a Texas transplant, I'm picky about my BBQ. Smoky Roots earned my respect from the first bite. The full rack ribs with that bourbon glaze? Life-changing. Respect."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">D</div>
+        <div class="author-info">
+          <div class="name">Derek W.</div>
+          <div class="source">TripAdvisor</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOURS & LOCATION -->
+<section class="location" id="location">
+  <div class="section-header">
+    <h2>Visit Us</h2>
+    <div class="divider"></div>
+    <p>Come hungry, leave happy. We're right off Music Row in the heart of Nashville.</p>
+  </div>
+  <div class="location-grid">
+    <div class="hours-card fade-up">
+      <h3>Hours</h3>
+      <div class="hours-row"><span class="day">Monday</span><span class="time">Closed</span></div>
+      <div class="hours-row"><span class="day">Tuesday – Thursday</span><span class="time">11:00 AM – 9:00 PM</span></div>
+      <div class="hours-row"><span class="day">Friday – Saturday</span><span class="time">11:00 AM – 11:00 PM</span></div>
+      <div class="hours-row"><span class="day">Sunday</span><span class="time">11:00 AM – 8:00 PM</span></div>
+      <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--smoke); font-style:italic;">⚡ We sell out daily — arrive early for the best selection.</p>
+    </div>
+    <div class="address-card fade-up">
+      <h3>Location &amp; Contact</h3>
+      <div class="contact-line"><span class="icon">📍</span><span>1204 Music Row Blvd<br>Nashville, TN 37203</span></div>
+      <div class="contact-line"><span class="icon">📞</span><a href="tel:+16155551247">(615) 555-1247</a></div>
+      <div class="contact-line"><span class="icon">✉️</span><a href="mailto:hello@smokyrootsbbq.com">hello@smokyrootsbbq.com</a></div>
+      <div class="map-placeholder">📍 Interactive Map</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT CTA -->
+<section class="contact-cta" id="contact">
+  <h2>Ready to Eat?</h2>
+  <p>Place a pickup or delivery order, book a table for your group, or let us cater your next event.</p>
+  <div class="hero-buttons">
+    <a href="tel:+16155551247" class="btn btn-primary">Call to Order</a>
+    <a href="mailto:hello@smokyrootsbbq.com" class="btn btn-outline">Email Us</a>
+  </div>
+  <div class="contact-methods">
+    <div class="contact-method">
+      <div class="icon">🍖</div>
+      <div class="label">Catering</div>
+      <div class="value"><a href="mailto:catering@smokyrootsbbq.com">catering@smokyrootsbbq.com</a></div>
+    </div>
+    <div class="contact-method">
+      <div class="icon">🎵</div>
+      <div class="label">Private Events</div>
+      <div class="value"><a href="tel:+16155551247">(615) 555-1247</a></div>
+    </div>
+    <div class="contact-method">
+      <div class="icon">🚗</div>
+      <div class="label">Delivery</div>
+      <div class="value">DoorDash &amp; UberEats</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">SMOKY ROOTS BBQ</div>
+  <div class="social">
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+    <a href="#">Twitter</a>
+    <a href="#">Yelp</a>
+  </div>
+  <p>&copy; 2024 Smoky Roots BBQ. All rights reserved. Nashville, Tennessee.</p>
+  <span class="demo-badge">Portfolio Demo — West Digital</span>
+</footer>
+
+<script>
+// Navbar scroll
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Hamburger
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// Close mobile nav on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// Menu tabs
+document.querySelectorAll('.menu-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.menu-category').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    // Re-trigger fade-up for newly visible items
+    document.querySelectorAll(`#${tab.dataset.tab} .fade-up`).forEach(el => {
+      el.classList.remove('visible');
+      setTimeout(() => observer.observe(el), 50);
+    });
+  });
+});
+
+// Scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
