@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>West Digital — Web Design Agency</title>
+<title>West Digital — Web Design Agency | Nashville, TN</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -73,25 +73,66 @@ section{padding:100px 24px}
 .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px;margin-top:48px}
 .project-card{border-radius:var(--radius);overflow:hidden;background:var(--bg3);border:1px solid rgba(255,255,255,.06);transition:all .4s}
 .project-card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,0,0,.4)}
-.project-thumb{height:220px;position:relative;overflow:hidden}
-.project-thumb::after{content:'Preview Coming Soon';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1rem;color:rgba(255,255,255,.6);letter-spacing:1px}
-.pt-1{background:linear-gradient(135deg,#6c63ff,#00d4ff)}
-.pt-2{background:linear-gradient(135deg,#a855f7,#ec4899)}
-.pt-3{background:linear-gradient(135deg,#06ffa5,#00d4ff)}
 .project-info{padding:24px}
 .project-info h3{font-size:1.15rem;font-weight:700;margin-bottom:6px}
 .project-info p{color:var(--text2);font-size:.9rem}
 .project-tag{display:inline-block;padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:600;background:rgba(108,99,255,.15);color:var(--accent);margin-top:12px}
 
+/* MINI BROWSER MOCKUPS */
+.mini-browser{height:220px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.mini-browser .browser-bar{height:28px;display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0}
+.mini-browser .browser-bar .dot{width:8px;height:8px;border-radius:50%;opacity:.6}
+.mini-browser .browser-bar .url-bar{flex:1;height:14px;border-radius:4px;margin-left:8px;opacity:.3}
+.mini-browser .browser-body{flex:1;padding:8px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+
+/* Smoky Roots BBQ mockup */
+.mockup-bbq{background:#1a110a}
+.mockup-bbq .browser-bar{background:#2a1a0e}
+.mockup-bbq .browser-bar .dot{background:#d4a24e}
+.mockup-bbq .browser-bar .url-bar{background:#d4a24e}
+.mockup-bbq .browser-body .mock-nav{height:10px;background:#2a1a0e;border-radius:3px;display:flex;gap:4px;padding:0 6px;align-items:center}
+.mockup-bbq .browser-body .mock-nav::before{content:'';display:block;width:20px;height:4px;background:#d4a24e;border-radius:2px}
+.mockup-bbq .browser-body .mock-hero{flex:0 0 60px;background:linear-gradient(135deg,#3a200a,#5a3010);border-radius:4px;display:flex;align-items:center;justify-content:center}
+.mockup-bbq .browser-body .mock-hero::after{content:'';display:block;width:50%;height:10px;background:#d4a24e;border-radius:3px;opacity:.7}
+.mockup-bbq .browser-body .mock-grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.mockup-bbq .browser-body .mock-grid .grid-item{background:#2a1a0e;border-radius:3px;position:relative}
+.mockup-bbq .browser-body .mock-grid .grid-item::after{content:'';position:absolute;bottom:4px;left:4px;right:4px;height:4px;background:#d4a24e;border-radius:2px;opacity:.4}
+
+/* Elite Cuts mockup */
+.mockup-cuts{background:#0d0d0d}
+.mockup-cuts .browser-bar{background:#1a1a1a}
+.mockup-cuts .browser-bar .dot{background:#c8a84e}
+.mockup-cuts .browser-bar .url-bar{background:#c8a84e}
+.mockup-cuts .browser-body .mock-nav{height:10px;background:#1a1a1a;border-radius:3px;display:flex;gap:4px;padding:0 6px;align-items:center}
+.mockup-cuts .browser-body .mock-nav::before{content:'';display:block;width:20px;height:4px;background:#c8a84e;border-radius:2px}
+.mockup-cuts .browser-body .mock-hero{flex:0 0 55px;background:linear-gradient(135deg,#1a1a1a,#2a2518);border-radius:4px;display:flex;align-items:center;justify-content:center}
+.mockup-cuts .browser-body .mock-hero::after{content:'';display:block;width:40%;height:10px;background:#c8a84e;border-radius:3px;opacity:.7}
+.mockup-cuts .browser-body .mock-cards{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.mockup-cuts .browser-body .mock-cards .card-item{background:#1a1a1a;border-radius:3px;border:1px solid rgba(200,168,78,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.mockup-cuts .browser-body .mock-cards .card-item::before{content:'';display:block;width:16px;height:16px;border-radius:50%;background:rgba(200,168,78,.2)}
+.mockup-cuts .browser-body .mock-cards .card-item::after{content:'';display:block;width:60%;height:4px;background:rgba(200,168,78,.3);border-radius:2px}
+
+/* Your Business mockup */
+.mockup-yours{background:linear-gradient(135deg,#6c63ff,#00d4ff);display:flex;align-items:center;justify-content:center;height:220px}
+.mockup-yours .plus-icon{width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:300;color:rgba(255,255,255,.6);transition:all .4s}
+.project-card:hover .mockup-yours .plus-icon{border-color:rgba(255,255,255,.7);color:rgba(255,255,255,.9);transform:scale(1.1)}
+
 /* ABOUT */
 .about{background:var(--bg)}
 .about-wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:48px}
-.about-visual{height:360px;border-radius:var(--radius);background:linear-gradient(135deg,var(--bg3),rgba(108,99,255,.15));border:1px solid rgba(108,99,255,.2);display:flex;align-items:center;justify-content:center;font-size:4rem}
+.about-visual{height:360px;border-radius:var(--radius);background:var(--bg2);border:1px solid rgba(108,99,255,.2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.code-visual{font-family:'Courier New',monospace;font-size:.75rem;color:var(--text2);line-height:1.9;padding:28px;opacity:.85;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center}
+.code-visual .line{white-space:nowrap;overflow:hidden}
+.code-visual .tag{color:var(--accent)}
+.code-visual .attr{color:var(--accent2)}
+.code-visual .str{color:#06ffa5}
+.code-visual .comment{color:#555;font-style:italic}
 .about-text p{color:var(--text2);font-size:1.05rem;line-height:1.8;margin-bottom:16px}
 .about-stats{display:flex;gap:40px;margin-top:28px}
 .stat{text-align:center}
-.stat .num{font-size:2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat .lbl{font-size:.8rem;color:var(--text2);margin-top:4px}
+.stat .num{font-size:1.1rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .lbl{font-size:.75rem;color:var(--text2);margin-top:4px}
+.stat-icon{font-size:1.4rem;margin-bottom:6px}
 
 /* PRICING */
 .pricing{background:var(--bg2)}
@@ -107,15 +148,14 @@ section{padding:100px 24px}
 .price-features li{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);color:var(--text2);font-size:.95rem;display:flex;align-items:center;gap:10px}
 .price-features li::before{content:'✓';color:var(--accent2);font-weight:700}
 
-/* TESTIMONIALS */
-.testimonials{background:var(--bg)}
-.test-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:28px;margin-top:48px}
-.test-card{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:32px;transition:all .4s}
-.test-card:hover{border-color:rgba(108,99,255,.2)}
-.test-card .stars{color:#fbbf24;margin-bottom:16px;font-size:1.1rem}
-.test-card blockquote{color:var(--text2);font-size:1rem;line-height:1.7;font-style:italic;margin-bottom:20px}
-.test-author{font-weight:600;font-size:.95rem}
-.test-role{color:var(--text2);font-size:.85rem}
+/* CTA SECTION */
+.cta-section{background:var(--bg);position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(108,99,255,.1),transparent 70%);top:-150px;right:-100px;pointer-events:none}
+.cta-inner{max-width:700px;margin:0 auto;text-align:center}
+.cta-inner h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;margin-bottom:20px}
+.cta-inner h2 .highlight{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cta-inner p{color:var(--text2);font-size:1.1rem;line-height:1.8;margin-bottom:12px}
+.cta-inner .cta-note{color:var(--accent2);font-size:.95rem;font-weight:500;margin-bottom:32px}
 
 /* CONTACT */
 .contact{background:var(--bg2)}
@@ -162,7 +202,6 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
       <a href="#portfolio">Work</a>
       <a href="#about">About</a>
       <a href="#pricing">Pricing</a>
-      <a href="#testimonials">Reviews</a>
       <a href="#contact" class="nav-cta">Get Started</a>
     </div>
     <div class="hamburger" id="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
@@ -174,12 +213,12 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
 <!-- HERO -->
 <section class="hero">
   <div class="hero-content">
-    <span class="hero-badge">✦ Web Design Agency</span>
-    <h1>We Build Websites That <span class="highlight">Get Results</span></h1>
-    <p>Professional, modern websites crafted to grow your business. From stunning designs to lightning-fast performance — we deliver digital experiences that convert.</p>
+    <span class="hero-badge">✦ Nashville Web Design</span>
+    <h1>Your Business Deserves a <span class="highlight">Real Website</span></h1>
+    <p>I build clean, custom websites for local businesses in Nashville. No templates, no page builders — just hand-crafted sites that actually look good and work on every device.</p>
     <div class="hero-btns">
-      <a href="#contact" class="btn btn-primary">Start Your Project →</a>
-      <a href="#portfolio" class="btn btn-outline">View Our Work</a>
+      <a href="#contact" class="btn btn-primary">Let's Talk →</a>
+      <a href="#portfolio" class="btn btn-outline">See My Work</a>
     </div>
   </div>
 </section>
@@ -188,30 +227,30 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
 <section class="services" id="services">
   <div class="container">
     <div class="reveal">
-      <span class="section-label">What We Do</span>
-      <h2 class="section-title">Services Built for Growth</h2>
-      <p class="section-sub">Everything you need to establish a powerful online presence.</p>
+      <span class="section-label">What I Do</span>
+      <h2 class="section-title">Websites That Work as Hard as You Do</h2>
+      <p class="section-sub">No fluff — just the stuff your business actually needs to look great online.</p>
     </div>
     <div class="services-grid">
       <div class="service-card reveal">
         <div class="service-icon si-1">🎨</div>
-        <h3>Web Design</h3>
-        <p>Custom, eye-catching designs that capture your brand identity and keep visitors engaged from the first click.</p>
+        <h3>Custom Design</h3>
+        <p>Your site should look like yours, not like everyone else's. I design from scratch based on your brand, your vibe, your goals.</p>
       </div>
       <div class="service-card reveal">
         <div class="service-icon si-2">⚡</div>
-        <h3>Custom Development</h3>
-        <p>Clean, hand-coded websites built for speed and scalability. No bloated templates — just quality code.</p>
+        <h3>Hand-Coded</h3>
+        <p>No WordPress bloat or drag-and-drop builders. Clean code means your site loads fast and runs smooth — every time.</p>
       </div>
       <div class="service-card reveal">
         <div class="service-icon si-3">📱</div>
-        <h3>Mobile-Friendly Sites</h3>
-        <p>Fully responsive designs that look incredible on every device — phones, tablets, and desktops.</p>
+        <h3>Mobile-First</h3>
+        <p>Most of your customers are on their phone. Every site I build looks and works perfectly on any screen size.</p>
       </div>
       <div class="service-card reveal">
         <div class="service-icon si-4">🚀</div>
-        <h3>Fast Delivery</h3>
-        <p>Quick turnaround without cutting corners. Get your site live and working for you in days, not months.</p>
+        <h3>Quick Turnaround</h3>
+        <p>I don't disappear for weeks. Most projects go from first conversation to live site in under a week.</p>
       </div>
     </div>
   </div>
@@ -221,33 +260,67 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
 <section class="portfolio" id="portfolio">
   <div class="container">
     <div class="reveal">
-      <span class="section-label">Our Work</span>
-      <h2 class="section-title">Recent Projects</h2>
-      <p class="section-sub">A selection of websites we've crafted for our clients.</p>
+      <span class="section-label">My Work</span>
+      <h2 class="section-title">Projects I've Built</h2>
+      <p class="section-sub">Real sites for real businesses. Click to see them live.</p>
     </div>
     <div class="portfolio-grid">
       <a href="portfolio/nashville-grill/index.html" class="project-card reveal" style="text-decoration:none;color:inherit">
-        <div class="project-thumb pt-1"></div>
+        <div class="mini-browser mockup-bbq">
+          <div class="browser-bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="url-bar"></div>
+          </div>
+          <div class="browser-body">
+            <div class="mock-nav"></div>
+            <div class="mock-hero"></div>
+            <div class="mock-grid">
+              <div class="grid-item"></div>
+              <div class="grid-item"></div>
+              <div class="grid-item"></div>
+              <div class="grid-item"></div>
+              <div class="grid-item"></div>
+              <div class="grid-item"></div>
+            </div>
+          </div>
+        </div>
         <div class="project-info">
           <h3>Smoky Roots BBQ</h3>
-          <p>Full restaurant site with tabbed menu, gallery, and online ordering</p>
+          <p>Full restaurant site with menu, gallery, and online ordering</p>
           <span class="project-tag">Restaurant</span>
         </div>
       </a>
       <a href="portfolio/elite-cuts/index.html" class="project-card reveal" style="text-decoration:none;color:inherit">
-        <div class="project-thumb pt-2"></div>
+        <div class="mini-browser mockup-cuts">
+          <div class="browser-bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="url-bar"></div>
+          </div>
+          <div class="browser-body">
+            <div class="mock-nav"></div>
+            <div class="mock-hero"></div>
+            <div class="mock-cards">
+              <div class="card-item"></div>
+              <div class="card-item"></div>
+              <div class="card-item"></div>
+              <div class="card-item"></div>
+            </div>
+          </div>
+        </div>
         <div class="project-info">
           <h3>Elite Cuts Barbershop</h3>
-          <p>Premium barbershop site with booking, team profiles, and reviews</p>
+          <p>Premium barbershop site with booking and service details</p>
           <span class="project-tag">Local Business</span>
         </div>
       </a>
       <div class="project-card reveal">
-        <div class="project-thumb pt-3"></div>
+        <div class="mockup-yours">
+          <div class="plus-icon">+</div>
+        </div>
         <div class="project-info">
           <h3>Your Business Here</h3>
-          <p>Ready to be our next success story? Let's build something great.</p>
-          <span class="project-tag">Coming Soon</span>
+          <p>This spot is waiting for you. Let's build something you're proud of.</p>
+          <span class="project-tag">Available</span>
         </div>
       </div>
     </div>
@@ -258,18 +331,45 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
 <section class="about" id="about">
   <div class="container">
     <div class="about-wrap">
-      <div class="about-visual reveal">👨‍💻</div>
+      <div class="about-visual reveal">
+        <div class="code-visual">
+          <div class="line"><span class="comment">// building something real</span></div>
+          <div class="line"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"your-website"</span><span class="tag">&gt;</span></div>
+          <div class="line">&nbsp;&nbsp;<span class="tag">&lt;h1&gt;</span>Your Brand<span class="tag">&lt;/h1&gt;</span></div>
+          <div class="line">&nbsp;&nbsp;<span class="tag">&lt;p&gt;</span>Custom built with care<span class="tag">&lt;/p&gt;</span></div>
+          <div class="line">&nbsp;&nbsp;<span class="tag">&lt;style&gt;</span></div>
+          <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">.your-website</span> {</div>
+          <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crafted-by: <span class="str">Anson</span>;</div>
+          <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;location: <span class="str">Nashville, TN</span>;</div>
+          <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quality: <span class="str">always 100%</span>;</div>
+          <div class="line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div class="line">&nbsp;&nbsp;<span class="tag">&lt;/style&gt;</span></div>
+          <div class="line"><span class="tag">&lt;/div&gt;</span></div>
+        </div>
+      </div>
       <div class="reveal">
-        <span class="section-label">About Us</span>
-        <h2 class="section-title">Meet West Digital</h2>
+        <span class="section-label">About</span>
+        <h2 class="section-title">Hey, I'm Anson.</h2>
         <div class="about-text">
-          <p>Founded by Anson, West Digital is a web design agency focused on one thing: building websites that actually work for your business. We combine clean design with smart development to create digital experiences that look professional and drive real results.</p>
-          <p>Every project gets our full attention. No cookie-cutter templates, no outsourcing — just dedicated craftsmanship from concept to launch.</p>
+          <p>I run West Digital out of Nashville, TN. I got into web design because I kept seeing local businesses with either no website at all, or one that looked like it was built in 2009. That didn't sit right with me.</p>
+          <p>I believe every business — whether it's a barbershop, a restaurant, or a one-person startup — deserves a website that looks professional and actually represents who they are. I build every site by hand, give every project my full attention, and I don't stop until it's something we're both proud of.</p>
         </div>
         <div class="about-stats">
-          <div class="stat"><div class="num">50+</div><div class="lbl">Projects</div></div>
-          <div class="stat"><div class="num">100%</div><div class="lbl">Satisfaction</div></div>
-          <div class="stat"><div class="num">Fast</div><div class="lbl">Turnaround</div></div>
+          <div class="stat">
+            <div class="stat-icon">📍</div>
+            <div class="num">Nashville</div>
+            <div class="lbl">Based</div>
+          </div>
+          <div class="stat">
+            <div class="stat-icon">⚡</div>
+            <div class="num">Fast</div>
+            <div class="lbl">Turnaround</div>
+          </div>
+          <div class="stat">
+            <div class="stat-icon">🛠</div>
+            <div class="num">Custom</div>
+            <div class="lbl">Built</div>
+          </div>
         </div>
       </div>
     </div>
@@ -281,8 +381,8 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
   <div class="container">
     <div class="reveal">
       <span class="section-label">Pricing</span>
-      <h2 class="section-title">Simple, Transparent Pricing</h2>
-      <p class="section-sub">Quality web design that fits your budget. No hidden fees.</p>
+      <h2 class="section-title">Straightforward Pricing</h2>
+      <p class="section-sub">No hidden fees, no surprises. Pick what fits your needs.</p>
     </div>
     <div class="pricing-grid">
       <div class="price-card reveal">
@@ -327,32 +427,15 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section class="testimonials" id="testimonials">
+<!-- CTA SECTION (replaces testimonials) -->
+<section class="cta-section" id="cta">
   <div class="container">
-    <div class="reveal">
-      <span class="section-label">Testimonials</span>
-      <h2 class="section-title">What Our Clients Say</h2>
-    </div>
-    <div class="test-grid">
-      <div class="test-card reveal">
-        <div class="stars">★★★★★</div>
-        <blockquote>"West Digital completely transformed our online presence. The site looks incredible and our traffic has doubled since launch. Highly recommend!"</blockquote>
-        <div class="test-author">Sarah M.</div>
-        <div class="test-role">Small Business Owner</div>
-      </div>
-      <div class="test-card reveal">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Fast, professional, and the design exceeded our expectations. Anson really listened to what we needed and delivered beyond what we imagined."</blockquote>
-        <div class="test-author">James T.</div>
-        <div class="test-role">Startup Founder</div>
-      </div>
-      <div class="test-card reveal">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Best investment we've made for our business. The website pays for itself every month with the leads it brings in. Outstanding work."</blockquote>
-        <div class="test-author">Maria L.</div>
-        <div class="test-role">Restaurant Owner</div>
-      </div>
+    <div class="cta-inner reveal">
+      <span class="section-label">Let's Work Together</span>
+      <h2>Be One of Our <span class="highlight">First Clients</span></h2>
+      <p>I'm building my reputation one project at a time. That means every client gets my full attention, my best work, and the kind of care that bigger agencies just can't offer.</p>
+      <div class="cta-note">Premium attention at startup prices — that's the deal.</div>
+      <a href="#contact" class="btn btn-primary">Start a Conversation →</a>
     </div>
   </div>
 </section>
@@ -363,17 +446,17 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
     <div class="contact-wrap">
       <div class="reveal">
         <span class="section-label">Get In Touch</span>
-        <h2 class="section-title">Let's Build Something Great</h2>
+        <h2 class="section-title">Let's Talk About Your Project</h2>
         <div class="contact-info">
-          <p>Ready to take your online presence to the next level? Reach out and let's talk about your project.</p>
+          <p>Got an idea? Need a website? Just want to ask a question? Send me a message and I'll get back to you quick.</p>
           <a href="mailto:Percywest300@gmail.com" class="contact-link">📧 Percywest300@gmail.com</a>
         </div>
       </div>
       <form class="contact-form reveal" action="https://formsubmit.co/Percywest300@gmail.com" method="POST">
         <input type="text" name="name" placeholder="Your Name" required>
         <input type="email" name="email" placeholder="Your Email" required>
-        <input type="text" name="subject" placeholder="Project Type (e.g. Business Website)">
-        <textarea name="message" placeholder="Tell us about your project..." required></textarea>
+        <input type="text" name="subject" placeholder="What do you need? (e.g. Restaurant Website)">
+        <textarea name="message" placeholder="Tell me a bit about your project..." required></textarea>
         <button type="submit" class="btn btn-primary" style="justify-content:center">Send Message →</button>
       </form>
     </div>
@@ -383,7 +466,7 @@ footer .logo{margin-bottom:12px;display:inline-block;font-size:1.2rem}
 <!-- FOOTER -->
 <footer>
   <div class="logo">West Digital</div>
-  <p>© 2026 West Digital. All rights reserved.</p>
+  <p>© 2026 West Digital. Nashville, TN.</p>
 </footer>
 
 <script>
