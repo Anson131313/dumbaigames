@@ -89,8 +89,8 @@ function spawnMole() {
   } while(snake.some(s => s.x===pos.x && s.y===pos.y));
   mole = pos;
   mole.born = Date.now();
-  // Timer gets shorter as score goes up, min 1200ms
-  const moleTime = Math.max(1200, MOLE_BASE_TIME - score * 8);
+  // Timer scales with speed — slower snake = more time to reach mole, min 1500ms
+  const moleTime = Math.max(1500, MOLE_BASE_TIME - score * 5 + (speed - 220) * 15);
   mole.timeAllowed = moleTime;
   moleTimer = setTimeout(() => {
     missed++;
