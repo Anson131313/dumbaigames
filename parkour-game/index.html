@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Rooftop Runner</title>
+<style>*{margin:0;padding:0;overflow:hidden;touch-action:none}body{background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+let W,H;
+function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+
+let state='menu',score=0,coinCount=0,dist=0,speed=0,baseSpeed=4,tick=0;
+let hi=+localStorage.getItem('rr_hi')||0;
+let player,platforms,coins,spikes,particles,buildings;
+
+function init(){
+  speed=baseSpeed;tick=0;dist=0;coinCount=0;score=0;
+  player={x:80,y:0,w:30,h:36,vy:0,grounded:false};
+  platforms=[];coins=[];spikes=[];particles=[];
+  buildings=[[],[],[]];
+  for(let l=0;l<3;l++){let bx=0;while(bx<W*2){let bw=30+Math.random()*60,bh=40+Math.random()*150*(l+1)/3;buildings[l].push({x:bx,w:bw,h:bh});bx+=bw+Math.random()*30}}
+  let px=0;
+  while(px<W*2){let pw=120+Math.random()*200,py=H*0.65+Math.random()*40-20;platforms.push({x:px,y:py,w:pw});px+=pw+60+Math.random()*80}
+  player.y=platforms[0].y-player.h;
+  for(let p of platforms)addStuff(p);
+}
+
+function addStuff(p){
+  if(Math.random()<0.6){let n=1+Math.floor(Math.random()*3);for(let i=0;i<n;i++)coins.push({x:p.x+p.w*0.3+i*25,y:p.y-45-Math.random()*20,got:false})}
+  if(Math.random()<0.3&&p.w>100){spikes.push({x:p.x+30+Math.random()*(p.w-60),y:p.y-16,w:16,h:16})}
+}
+
+function spawnPlat(){
+  let last=platforms[platforms.length-1];
+  let gap=60+Math.random()*80+speed*3;
+  let pw=100+Math.random()*200;
+  let py=last.y+Math.random()*60-30;
+  py=Math.max(H*0.5,Math.min(H*0.8,py));
+  let p={x:last.x+last.w+gap,y:py,w:pw};
+  platforms.push(p);addStuff(p);
+}
+
+function jump(){
+  if(state==='menu'){state='playing';init();return}
+  if(state==='dead'){state='playing';init();return}
+  if(state==='playing'&&player.grounded){player.vy=-11;player.grounded=false;
+    for(let i=0;i<6;i++)particles.push({x:player.x+player.w/2,y:player.y+player.h,vx:(Math.random()-0.5)*3,vy:Math.random()*2,life:15,c:'rgba(255,255,255,0.7)'})
+  }
+}
+
+function die(){
+  state='dead';score=Math.floor(dist/10)+coinCount*10;
+  if(score>hi){hi=score;localStorage.setItem('rr_hi',hi)}
+  for(let i=0;i<20;i++)particles.push({x:player.x+player.w/2,y:player.y+player.h/2,vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,life:25,c:['#f44','#ff0','#f80'][i%3]});
+}
+
+function update(){
+  if(state!=='playing')return;
+  tick++;speed=baseSpeed+tick*0.0008;
+  dist+=speed;
+  player.vy+=0.5;
+  player.y+=player.vy;
+  player.grounded=false;
+  for(let p of platforms){
+    p.x-=speed;
+    if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.vy>=0&&player.y+player.h>=p.y&&player.y+player.h<=p.y+15){
+      player.y=p.y-player.h;player.vy=0;player.grounded=true;
+    }
+  }
+  for(let co of coins){
+    co.x-=speed;
+    if(!co.got&&Math.abs(player.x+player.w/2-co.x)<20&&Math.abs(player.y+player.h/2-co.y)<20){
+      co.got=true;coinCount++;
+      for(let i=0;i<4;i++)particles.push({x:co.x,y:co.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:12,c:'#ff0'});
+    }
+  }
+  for(let sp of spikes){
+    sp.x-=speed;
+    if(player.x+player.w>sp.x+3&&player.x<sp.x+sp.w-3&&player.y+player.h>sp.y+3&&player.y<sp.y+sp.h)die();
+  }
+  if(player.y>H+50)die();
+  platforms=platforms.filter(p=>p.x+p.w>-50);
+  coins=coins.filter(co=>co.x>-50&&!co.got);
+  spikes=spikes.filter(sp=>sp.x>-50);
+  while(platforms[platforms.length-1].x+platforms[platforms.length-1].w<W*2)spawnPlat();
+  for(let l=0;l<3;l++){
+    let sp=speed*(0.1+l*0.12);
+    for(let b of buildings[l])b.x-=sp;
+    buildings[l]=buildings[l].filter(b=>b.x+b.w>-50);
+    let lb=buildings[l][buildings[l].length-1];
+    while(!lb||lb.x+lb.w<W*2){let bw=30+Math.random()*60,bh=40+Math.random()*150*(l+1)/3;let nx=lb?lb.x+lb.w+Math.random()*20:W;buildings[l].push({x:nx,w:bw,h:bh});lb=buildings[l][buildings[l].length-1]}
+  }
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life--;return p.life>0});
+}
+
+function draw(){
+  x.clearRect(0,0,W,H);
+  let g=x.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#1a0533');g.addColorStop(0.4,'#4a1942');g.addColorStop(0.7,'#c84b31');g.addColorStop(1,'#ffcf48');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.fillStyle='#ffe066';x.beginPath();x.arc(W*0.75,H*0.5,40,0,Math.PI*2);x.fill();
+
+  if(state==='menu'){
+    let cols=['#1a0a2e','#2d1b4e','#4a2c6e'];
+    for(let l=0;l<3;l++){x.fillStyle=cols[l];let bx=0;while(bx<W){let bw=30+Math.random()*50,bh=30+Math.random()*100*(l+1)/3;x.fillRect(bx,H-bh,bw,bh);bx+=bw+10}}
+    x.textAlign='center';x.textBaseline='middle';
+    x.fillStyle='#fff';x.font='bold '+Math.min(60,W/7)+'px Arial, sans-serif';
+    x.fillText('ROOFTOP RUNNER',W/2,H*0.3);
+    x.fillStyle='#ffcf48';x.font=Math.min(24,W/18)+'px Arial, sans-serif';
+    x.fillText('Tap or Press Space to Start',W/2,H*0.45);
+    x.fillStyle='#aaa';x.font=Math.min(18,W/24)+'px Arial, sans-serif';
+    x.fillText('High Score: '+hi,W/2,H*0.55);
+    return;
+  }
+
+  let cols=['#1a0a2e','#2d1b4e','#4a2c6e'];
+  for(let l=0;l<3;l++){x.fillStyle=cols[l];for(let b of buildings[l])x.fillRect(b.x,H-b.h,b.w,b.h)}
+
+  for(let p of platforms){x.fillStyle='#555';x.fillRect(p.x,p.y,p.w,H-p.y);x.fillStyle='#999';x.fillRect(p.x,p.y,p.w,4)}
+  x.fillStyle='#f44';for(let sp of spikes){x.beginPath();x.moveTo(sp.x,sp.y+sp.h);x.lineTo(sp.x+sp.w/2,sp.y);x.lineTo(sp.x+sp.w,sp.y+sp.h);x.fill()}
+  for(let co of coins){if(co.got)continue;x.fillStyle='#ffdd00';x.beginPath();x.arc(co.x,co.y,8,0,Math.PI*2);x.fill();x.fillStyle='#cc9900';x.beginPath();x.arc(co.x,co.y,4,0,Math.PI*2);x.fill()}
+
+  if(state==='playing'||state==='dead'){
+    x.fillStyle='#4af';x.fillRect(player.x,player.y,player.w,player.h);
+    x.fillStyle='#fff';x.fillRect(player.x+17,player.y+8,8,8);x.fillRect(player.x+7,player.y+8,8,8);
+    x.fillStyle='#000';x.fillRect(player.x+21,player.y+11,4,4);x.fillRect(player.x+10,player.y+11,4,4);
+  }
+
+  for(let p of particles){x.globalAlpha=p.life/25;x.fillStyle=p.c;x.fillRect(p.x-2,p.y-2,4,4)}
+  x.globalAlpha=1;
+
+  x.textAlign='left';x.textBaseline='top';x.fillStyle='#fff';x.font='bold 20px Arial, sans-serif';
+  let sc=Math.floor(dist/10)+coinCount*10;
+  x.fillText('Score: '+sc,15,15);
+  x.fillText('Coins: '+coinCount,15,42);
+
+  if(state==='dead'){
+    x.fillStyle='rgba(0,0,0,0.55)';x.fillRect(0,0,W,H);
+    x.textAlign='center';x.textBaseline='middle';
+    x.fillStyle='#f44';x.font='bold '+Math.min(50,W/8)+'px Arial, sans-serif';x.fillText('GAME OVER',W/2,H*0.3);
+    x.fillStyle='#fff';x.font=Math.min(28,W/14)+'px Arial, sans-serif';x.fillText('Score: '+score,W/2,H*0.44);
+    x.fillStyle='#ffcf48';x.fillText('Best: '+hi,W/2,H*0.52);
+    x.fillStyle='#aaa';x.font=Math.min(20,W/20)+'px Arial, sans-serif';x.fillText('Tap or Press Space to Restart',W/2,H*0.65);
+  }
+}
+
+function mainLoop(){update();draw();requestAnimationFrame(mainLoop)}
+mainLoop();
+
+window.addEventListener('keydown',function(e){if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});
+window.addEventListener('touchstart',function(e){e.preventDefault();jump()},{passive:false});
+window.addEventListener('mousedown',function(){jump()});
+</script>
+</body>
+</html>

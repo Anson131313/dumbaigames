@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clash Royale Clone</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+#game-container { position: relative; }
+canvas { display: block; border: 3px solid #c8a84e; border-radius: 8px; cursor: pointer; }
+#ui-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 120px; pointer-events: none; }
+#card-hand { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: all; }
+.card { width: 72px; height: 95px; border-radius: 8px; cursor: grab; user-select: none; position: relative; transition: transform 0.15s, box-shadow 0.15s; border: 2px solid #c8a84e; overflow: hidden; }
+.card:hover { transform: translateY(-8px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+.card.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
+.card.disabled:hover { transform: none; box-shadow: none; }
+.card.dragging { opacity: 0.5; transform: scale(0.9); }
+.card-name { font-size: 9px; font-weight: bold; color: #fff; text-align: center; padding: 2px; text-shadow: 1px 1px 2px #000; background: rgba(0,0,0,0.5); }
+.card-icon { height: 52px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.card-cost { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #e040fb; color: #fff; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; z-index: 2; }
+.card-info { font-size: 8px; color: #ddd; text-align: center; padding: 1px; background: rgba(0,0,0,0.4); }
+#elixir-bar-container { position: absolute; bottom: 108px; left: 10px; right: 10px; height: 22px; background: rgba(0,0,0,0.6); border-radius: 11px; border: 2px solid #555; pointer-events: none; }
+#elixir-bar { height: 100%; background: linear-gradient(to right, #e040fb, #ce45e8); border-radius: 9px; transition: width 0.1s; }
+#elixir-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; }
+#timer { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 18px; font-weight: bold; text-shadow: 2px 2px 4px #000; background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 12px; pointer-events: none; }
+#drag-ghost { position: fixed; pointer-events: none; z-index: 1000; display: none; }
+#drag-ghost canvas { border-radius: 50%; }
+#game-over { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; flex-direction: column; color: #fff; z-index: 100; }
+#game-over h1 { font-size: 42px; margin-bottom: 10px; }
+#game-over .crowns { font-size: 28px; margin-bottom: 20px; }
+#game-over button { padding: 12px 32px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; background: #e040fb; color: #fff; font-weight: bold; }
+#game-over button:hover { background: #c030d0; }
+#next-card { position: absolute; bottom: 8px; right: 8px; pointer-events: none; }
+#next-card .card { width: 50px; height: 65px; pointer-events: none; }
+#next-card .card-icon { height: 35px; font-size: 20px; }
+#next-card .card-cost { width: 16px; height: 16px; font-size: 9px; }
+#next-card-label { color: #aaa; font-size: 10px; text-align: center; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="arena"></canvas>
+  <div id="timer">3:00</div>
+  <div id="elixir-bar-container">
+    <div id="elixir-bar" style="width:50%"></div>
+    <div id="elixir-text">5/10</div>
+  </div>
+  <div id="card-hand"></div>
+  <div id="next-card"><div id="next-card-label">Next</div></div>
+  <div id="drag-ghost"><canvas width="50" height="50"></canvas></div>
+  <div id="game-over">
+    <h1 id="result-text"></h1>
+    <div class="crowns" id="crown-text"></div>
+    <button onclick="restartGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ============= CONSTANTS =============
+const W = 400, H = 600;
+const RIVER_Y = H/2, RIVER_H = 24;
+const TILE = 20;
+const GAME_DURATION = 180;
+const ELIXIR_RATE = 1/2.8;
+const MAX_ELIXIR = 10;
+
+const canvas = document.getElementById('arena');
+const ctx = canvas.getContext('2d');
+canvas.width = W; canvas.height = H;
+
+// ============= CARD DEFINITIONS =============
+const CARD_DEFS = {
+  knight: { name:'Knight', cost:3, emoji:'⚔️', hp:660, dmg:75, speed:1.2, range:25, atkSpeed:1.1, count:1, type:'melee', color:'#f4a460', size:10, targets:'all' },
+  archers: { name:'Archers', cost:3, emoji:'🏹', hp:252, dmg:50, speed:1.0, range:120, atkSpeed:1.2, count:2, type:'ranged', color:'#ff69b4', size:8, targets:'all' },
+  giant: { name:'Giant', cost:5, emoji:'🗿', hp:2000, dmg:120, speed:0.7, range:25, atkSpeed:1.5, count:1, type:'melee', color:'#8b4513', size:14, targets:'buildings' },
+  fireball: { name:'Fireball', cost:4, emoji:'🔥', type:'spell', radius:60, dmg:325, color:'#ff4500' },
+  miniPekka: { name:'Mini PEKKA', cost:4, emoji:'🤖', hp:600, dmg:325, speed:1.3, range:25, atkSpeed:1.8, count:1, type:'melee', color:'#4169e1', size:11, targets:'all' },
+  musketeer: { name:'Musketeer', cost:4, emoji:'🔫', hp:540, dmg:100, speed:1.0, range:140, atkSpeed:1.1, count:1, type:'ranged', color:'#daa520', size:9, targets:'all' },
+  skelArmy: { name:'Skel Army', cost:3, emoji:'💀', hp:50, dmg:50, speed:1.4, range:20, atkSpeed:1.0, count:12, type:'melee', color:'#d3d3d3', size:6, targets:'all' },
+  babyDrag: { name:'Baby Dragon', cost:4, emoji:'🐉', hp:600, dmg:75, speed:1.1, range:100, atkSpeed:1.8, count:1, type:'ranged', color:'#32cd32', size:12, targets:'all', flying:true, splash:20 }
+};
+
+const ALL_CARDS = Object.keys(CARD_DEFS);
+
+// ============= GAME STATE =============
+let state, animFrame;
+
+function initState() {
+  const deck = [...ALL_CARDS];
+  shuffle(deck);
+  const aiDeck = [...ALL_CARDS];
+  shuffle(aiDeck);
+  
+  state = {
+    time: GAME_DURATION,
+    elixir: 5, aiElixir: 5,
+    troops: [],
+    towers: [],
+    effects: [],
+    particles: [],
+    projectiles: [],
+    playerDeck: deck,
+    playerHand: deck.splice(0,4),
+    playerNext: deck.splice(0,1)[0],
+    aiDeck: aiDeck,
+    aiHand: aiDeck.splice(0,4),
+    aiNext: aiDeck.splice(0,1)[0],
+    aiTimer: 0,
+    crowns: {player:0, ai:0},
+    gameOver: false,
+    lastTime: performance.now(),
+    dragCard: null,
+    dragX: 0, dragY: 0,
+    kingActivated: { player: false, ai: false }
+  };
+
+  // Create towers
+  // Player towers (bottom)
+  state.towers.push({ x:100, y:520, hp:1400, maxHp:1400, team:'player', type:'princess', dmg:50, range:150, atkSpeed:0.8, atkTimer:0, alive:true });
+  state.towers.push({ x:300, y:520, hp:1400, maxHp:1400, team:'player', type:'princess', dmg:50, range:150, atkSpeed:0.8, atkTimer:0, alive:true });
+  state.towers.push({ x:200, y:560, hp:2400, maxHp:2400, team:'player', type:'king', dmg:70, range:160, atkSpeed:1.0, atkTimer:0, alive:true, active:false });
+  // AI towers (top)
+  state.towers.push({ x:100, y:80, hp:1400, maxHp:1400, team:'ai', type:'princess', dmg:50, range:150, atkSpeed:0.8, atkTimer:0, alive:true });
+  state.towers.push({ x:300, y:80, hp:1400, maxHp:1400, team:'ai', type:'princess', dmg:50, range:150, atkSpeed:0.8, atkTimer:0, alive:true });
+  state.towers.push({ x:200, y:40, hp:2400, maxHp:2400, team:'ai', type:'king', dmg:70, range:160, atkSpeed:1.0, atkTimer:0, alive:true, active:false });
+}
+
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
+
+// ============= SPAWNING =============
+function spawnTroop(cardKey, x, y, team) {
+  const def = CARD_DEFS[cardKey];
+  if(def.type === 'spell') {
+    // Spell effect
+    spawnSpell(cardKey, x, y, team);
+    return;
+  }
+  const count = def.count || 1;
+  for(let i = 0; i < count; i++) {
+    const ox = count > 1 ? (Math.random()-0.5)*30 : 0;
+    const oy = count > 1 ? (Math.random()-0.5)*30 : 0;
+    state.troops.push({
+      x: x+ox, y: y+oy, hp: def.hp, maxHp: def.hp,
+      dmg: def.dmg, speed: def.speed, range: def.range,
+      atkSpeed: def.atkSpeed, atkTimer: 0, team,
+      color: def.color, size: def.size, targets: def.targets,
+      type: def.type, flying: def.flying||false, splash: def.splash||0,
+      alive: true, cardKey, target: null
+    });
+  }
+}
+
+function spawnSpell(cardKey, x, y, team) {
+  const def = CARD_DEFS[cardKey];
+  // Damage enemies in radius
+  const allTargets = [...state.troops.filter(t=>t.alive && t.team !== team), ...state.towers.filter(t=>t.alive && t.team !== team)];
+  allTargets.forEach(t => {
+    const d = dist(x,y,t.x,t.y);
+    if(d < def.radius) {
+      dealDamage(t, def.dmg, team);
+    }
+  });
+  // Visual effect
+  state.effects.push({ type:'explosion', x, y, radius:def.radius, timer:0.5, maxTimer:0.5, color:'#ff6600' });
+  for(let i=0;i<20;i++) {
+    state.particles.push({
+      x: x+(Math.random()-0.5)*def.radius, y: y+(Math.random()-0.5)*def.radius,
+      vx:(Math.random()-0.5)*80, vy:(Math.random()-0.5)*80-40,
+      life:0.6+Math.random()*0.4, maxLife:1, color:'#ff4400', size:3+Math.random()*3
+    });
+  }
+}
+
+function dealDamage(target, dmg, attackerTeam) {
+  target.hp -= dmg;
+  // Damage number
+  state.effects.push({
+    type:'dmgNum', x:target.x+(Math.random()-0.5)*10, y:target.y-15,
+    text:Math.round(dmg), timer:0.8, maxTimer:0.8, color:'#ff0'
+  });
+  if(target.hp <= 0) {
+    target.hp = 0;
+    target.alive = false;
+    // Death effect
+    for(let i=0;i<8;i++) {
+      state.particles.push({
+        x:target.x, y:target.y,
+        vx:(Math.random()-0.5)*60, vy:(Math.random()-0.5)*60,
+        life:0.5+Math.random()*0.3, maxLife:0.8, color:target.color||'#aaa', size:target.size?target.size/2:4
+      });
+    }
+    // Tower destruction
+    if(target.type === 'princess' || target.type === 'king') {
+      if(target.team === 'ai') state.crowns.player++;
+      else state.crowns.ai++;
+      // Activate king tower when princess is destroyed
+      const kingTower = state.towers.find(t => t.team === target.team && t.type === 'king');
+      if(kingTower && !kingTower.active) kingTower.active = true;
+      // Big explosion
+      for(let i=0;i<25;i++) {
+        state.particles.push({
+          x:target.x, y:target.y,
+          vx:(Math.random()-0.5)*120, vy:(Math.random()-0.5)*120,
+          life:0.8+Math.random()*0.5, maxLife:1.3, color:'#ff8800', size:4+Math.random()*4
+        });
+      }
+      state.effects.push({ type:'explosion', x:target.x, y:target.y, radius:40, timer:0.6, maxTimer:0.6, color:'#ffaa00' });
+      // King tower destroyed = instant win
+      if(target.type === 'king') {
+        if(target.team === 'ai') state.crowns.player = 3;
+        else state.crowns.ai = 3;
+      }
+    }
+  }
+}
+
+// ============= AI =============
+function updateAI(dt) {
+  state.aiTimer -= dt;
+  if(state.aiTimer > 0) return;
+  state.aiTimer = 1.5 + Math.random()*2;
+
+  // Pick a card we can afford
+  const playable = state.aiHand.filter(c => CARD_DEFS[c].cost <= state.aiElixir);
+  if(playable.length === 0) return;
+
+  // Semi-intelligent: prefer cheaper cards when low elixir, respond to threats
+  let card;
+  const enemyTroopsInAiHalf = state.troops.filter(t=>t.alive && t.team==='player' && t.y < RIVER_Y);
+  if(enemyTroopsInAiHalf.length > 0 && Math.random() < 0.7) {
+    // Defensive play
+    const threat = enemyTroopsInAiHalf[0];
+    card = playable[Math.floor(Math.random()*playable.length)];
+    const def = CARD_DEFS[card];
+    let x = threat.x + (Math.random()-0.5)*40;
+    let y = Math.max(40, Math.min(RIVER_Y - 40, threat.y - 30));
+    if(def.type === 'spell') {
+      y = threat.y; x = threat.x;
+    }
+    placeAICard(card, x, y);
+  } else if(state.aiElixir >= 7) {
+    // Aggressive push
+    card = playable[Math.floor(Math.random()*playable.length)];
+    const lane = Math.random() < 0.5 ? 100 : 300;
+    const x = lane + (Math.random()-0.5)*40;
+    const y = 120 + Math.random()*60;
+    placeAICard(card, x, y);
+  }
+}
+
+function placeAICard(card, x, y) {
+  const def = CARD_DEFS[card];
+  state.aiElixir -= def.cost;
+  spawnTroop(card, x, y, 'ai');
+  const idx = state.aiHand.indexOf(card);
+  state.aiHand[idx] = state.aiNext;
+  if(state.aiDeck.length > 0) state.aiNext = state.aiDeck.splice(0,1)[0];
+  else { state.aiDeck = [...ALL_CARDS]; shuffle(state.aiDeck); state.aiNext = state.aiDeck.splice(0,1)[0]; }
+}
+
+// ============= TARGETING =============
+function dist(x1,y1,x2,y2) { return Math.sqrt((x1-x2)**2+(y1-y2)**2); }
+
+function findTarget(troop) {
+  const enemies = state.troops.filter(t => t.alive && t.team !== troop.team && (troop.flying || !t.flying || troop.type==='ranged'));
+  const enemyTowers = state.towers.filter(t => t.alive && t.team !== troop.team && (t.active || t.type === 'princess'));
+
+  if(troop.targets === 'buildings') {
+    // Target nearest tower
+    let best = null, bestD = Infinity;
+    enemyTowers.forEach(t => { const d = dist(troop.x,troop.y,t.x,t.y); if(d<bestD){bestD=d;best=t;} });
+    return best;
+  }
+
+  // Target nearest enemy troop first if within aggro range, else tower
+  let best = null, bestD = Infinity;
+  enemies.forEach(t => {
+    if(t.flying && troop.type === 'melee' && !troop.flying) return; // melee can't hit flying
+    const d = dist(troop.x,troop.y,t.x,t.y);
+    if(d < bestD && d < 200) { bestD=d; best=t; }
+  });
+  if(best) return best;
+
+  // Target nearest tower
+  bestD = Infinity;
+  enemyTowers.forEach(t => { const d = dist(troop.x,troop.y,t.x,t.y); if(d<bestD){bestD=d;best=t;} });
+  return best;
+}
+
+// ============= UPDATE =============
+function update(dt) {
+  if(state.gameOver) return;
+
+  // Timer
+  state.time -= dt;
+  if(state.time <= 0) { state.time = 0; endGame(); return; }
+
+  // Elixir
+  const rate = state.time <= 60 ? ELIXIR_RATE * 2 : ELIXIR_RATE;
+  state.elixir = Math.min(MAX_ELIXIR, state.elixir + rate * dt);
+  state.aiElixir = Math.min(MAX_ELIXIR, state.aiElixir + rate * dt);
+
+  // AI
+  updateAI(dt);
+
+  // Update troops
+  state.troops.forEach(troop => {
+    if(!troop.alive) return;
+    troop.target = findTarget(troop);
+    if(!troop.target) {
+      // Walk toward enemy side
+      const dir = troop.team === 'player' ? -1 : 1;
+      troop.y += dir * troop.speed * 40 * dt;
+      return;
+    }
+
+    const d = dist(troop.x, troop.y, troop.target.x, troop.target.y);
+    if(d <= troop.range) {
+      // Attack
+      troop.atkTimer -= dt;
+      if(troop.atkTimer <= 0) {
+        troop.atkTimer = troop.atkSpeed;
+        if(troop.type === 'ranged') {
+          state.projectiles.push({
+            x:troop.x, y:troop.y, tx:troop.target.x, ty:troop.target.y,
+            speed:300, dmg:troop.dmg, team:troop.team, color:troop.color,
+            target:troop.target, splash:troop.splash||0
+          });
+        } else {
+          if(troop.splash > 0) {
+            const nearby = state.troops.filter(t=>t.alive && t.team!==troop.team && dist(troop.target.x,troop.target.y,t.x,t.y)<troop.splash);
+            nearby.forEach(t => dealDamage(t, troop.dmg, troop.team));
+            if(nearby.length === 0) dealDamage(troop.target, troop.dmg, troop.team);
+          } else {
+            dealDamage(troop.target, troop.dmg, troop.team);
+          }
+        }
+      }
+    } else {
+      // Move toward target
+      const dx = troop.target.x - troop.x;
+      const dy = troop.target.y - troop.y;
+      const len = Math.sqrt(dx*dx+dy*dy);
+      troop.x += (dx/len) * troop.speed * 40 * dt;
+      troop.y += (dy/len) * troop.speed * 40 * dt;
+    }
+  });
+
+  // Update tower attacks
+  state.towers.forEach(tower => {
+    if(!tower.alive) return;
+    if(tower.type === 'king' && !tower.active) return;
+    tower.atkTimer -= dt;
+    if(tower.atkTimer > 0) return;
+
+    // Find nearest enemy troop
+    const enemies = state.troops.filter(t => t.alive && t.team !== tower.team);
+    let best = null, bestD = Infinity;
+    enemies.forEach(t => { const d=dist(tower.x,tower.y,t.x,t.y); if(d<bestD&&d<tower.range){bestD=d;best=t;} });
+    if(best) {
+      tower.atkTimer = tower.atkSpeed;
+      state.projectiles.push({
+        x:tower.x, y:tower.y, tx:best.x, ty:best.y,
+        speed:400, dmg:tower.dmg, team:tower.team, color:'#fff',
+        target:best, splash:0
+      });
+    }
+  });
+
+  // Update projectiles
+  state.projectiles.forEach(p => {
+    if(!p.target || !p.target.alive) { p.done = true; return; }
+    const dx = p.target.x - p.x, dy = p.target.y - p.y;
+    const d = Math.sqrt(dx*dx+dy*dy);
+    if(d < 8) {
+      if(p.splash > 0) {
+        const nearby = [...state.troops.filter(t=>t.alive&&t.team!==p.team), ...state.towers.filter(t=>t.alive&&t.team!==p.team)];
+        nearby.forEach(t => { if(dist(p.target.x,p.target.y,t.x,t.y)<p.splash) dealDamage(t,p.dmg,p.team); });
+      } else {
+        dealDamage(p.target, p.dmg, p.team);
+      }
+      p.done = true;
+    } else {
+      p.x += (dx/d)*p.speed*dt;
+      p.y += (dy/d)*p.speed*dt;
+    }
+  });
+  state.projectiles = state.projectiles.filter(p => !p.done);
+
+  // Update effects
+  state.effects.forEach(e => e.timer -= dt);
+  state.effects = state.effects.filter(e => e.timer > 0);
+
+  // Update particles
+  state.particles.forEach(p => { p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=120*dt; p.life-=dt; });
+  state.particles = state.particles.filter(p => p.life > 0);
+
+  // Clean dead troops
+  state.troops = state.troops.filter(t => t.alive);
+
+  // Check crowns for game over
+  if(state.crowns.player >= 3 || state.crowns.ai >= 3) endGame();
+}
+
+function endGame() {
+  state.gameOver = true;
+  const overlay = document.getElementById('game-over');
+  const resultText = document.getElementById('result-text');
+  const crownText = document.getElementById('crown-text');
+  overlay.style.display = 'flex';
+  if(state.crowns.player > state.crowns.ai) {
+    resultText.textContent = '🏆 VICTORY!';
+    resultText.style.color = '#ffd700';
+  } else if(state.crowns.ai > state.crowns.player) {
+    resultText.textContent = '💀 DEFEAT';
+    resultText.style.color = '#ff4444';
+  } else {
+    resultText.textContent = '🤝 DRAW';
+    resultText.style.color = '#aaa';
+  }
+  crownText.textContent = `👑 ${state.crowns.player} - ${state.crowns.ai} 👑`;
+}
+
+// ============= RENDERING =============
+function drawArena() {
+  // Green field
+  ctx.fillStyle = '#4a7c3f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Lanes
+  ctx.strokeStyle = '#3d6b34';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5,5]);
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, RIVER_Y-RIVER_H/2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2, RIVER_Y+RIVER_H/2); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // River
+  const riverTop = RIVER_Y - RIVER_H/2;
+  ctx.fillStyle = '#3498db';
+  ctx.fillRect(0, riverTop, W, RIVER_H);
+  // River waves
+  ctx.strokeStyle = '#5dade2';
+  ctx.lineWidth = 2;
+  const t = performance.now()/1000;
+  for(let i=0;i<3;i++) {
+    ctx.beginPath();
+    for(let x=0;x<W;x+=5) {
+      const wy = riverTop + 6 + i*7 + Math.sin(x*0.05+t*2+i)*3;
+      x===0?ctx.moveTo(x,wy):ctx.lineTo(x,wy);
+    }
+    ctx.stroke();
+  }
+
+  // Bridges
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(70, riverTop-4, 60, RIVER_H+8);
+  ctx.fillRect(270, riverTop-4, 60, RIVER_H+8);
+  ctx.strokeStyle = '#6B5B3F';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(70, riverTop-4, 60, RIVER_H+8);
+  ctx.strokeRect(270, riverTop-4, 60, RIVER_H+8);
+
+  // Arena borders (subtle)
+  ctx.fillStyle = '#3d6b34';
+  ctx.fillRect(0,0,20,H);
+  ctx.fillRect(W-20,0,20,H);
+}
+
+function drawTower(tower) {
+  if(!tower.alive) {
+    // Rubble
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(tower.x, tower.y, 12, 0, Math.PI*2);
+    ctx.fill();
+    return;
+  }
+  const isKing = tower.type === 'king';
+  const r = isKing ? 20 : 15;
+  const color = tower.team === 'player' ? '#2196F3' : '#f44336';
+  const dark = tower.team === 'player' ? '#1565C0' : '#c62828';
+
+  // Tower body
+  ctx.fillStyle = dark;
+  ctx.fillRect(tower.x-r, tower.y-r, r*2, r*2);
+  ctx.fillStyle = color;
+  ctx.fillRect(tower.x-r+2, tower.y-r+2, r*2-4, r*2-4);
+
+  // Battlements
+  ctx.fillStyle = dark;
+  for(let i=0;i<4;i++) {
+    ctx.fillRect(tower.x-r+i*(r/1.5), tower.y-r-5, 6, 7);
+  }
+
+  // King crown
+  if(isKing) {
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.moveTo(tower.x-8, tower.y-r-5);
+    ctx.lineTo(tower.x-10, tower.y-r-14);
+    ctx.lineTo(tower.x-4, tower.y-r-9);
+    ctx.lineTo(tower.x, tower.y-r-16);
+    ctx.lineTo(tower.x+4, tower.y-r-9);
+    ctx.lineTo(tower.x+10, tower.y-r-14);
+    ctx.lineTo(tower.x+8, tower.y-r-5);
+    ctx.fill();
+    if(!tower.active) {
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(tower.x-r, tower.y-r, r*2, r*2);
+      ctx.fillStyle = '#aaa';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('💤', tower.x, tower.y+4);
+    }
+  }
+
+  // HP bar
+  drawHPBar(tower.x, tower.y - r - (isKing?18:8), r*2, 4, tower.hp, tower.maxHp, tower.team);
+}
+
+function drawHPBar(x, y, w, h, hp, maxHp, team) {
+  const ratio = hp/maxHp;
+  ctx.fillStyle = '#333';
+  ctx.fillRect(x-w/2-1, y-1, w+2, h+2);
+  ctx.fillStyle = ratio > 0.5 ? '#4caf50' : ratio > 0.25 ? '#ff9800' : '#f44336';
+  ctx.fillRect(x-w/2, y, w*ratio, h);
+}
+
+function drawTroop(troop) {
+  if(!troop.alive) return;
+  const {x,y,color,size,team,flying} = troop;
+
+  // Shadow for flying
+  if(flying) {
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x, y+8, size, size/2, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  const drawY = flying ? y-8 : y;
+
+  // Body
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, drawY, size, 0, Math.PI*2);
+  ctx.fill();
+
+  // Team indicator ring
+  ctx.strokeStyle = team === 'player' ? '#2196F3' : '#f44336';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, drawY, size+2, 0, Math.PI*2);
+  ctx.stroke();
+
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x-size/3, drawY-size/4, size/4, 0, Math.PI*2);
+  ctx.arc(x+size/3, drawY-size/4, size/4, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(x-size/3, drawY-size/4, size/6, 0, Math.PI*2);
+  ctx.arc(x+size/3, drawY-size/4, size/6, 0, Math.PI*2);
+  ctx.fill();
+
+  // HP bar
+  if(troop.hp < troop.maxHp) {
+    drawHPBar(x, drawY-size-6, size*2, 3, troop.hp, troop.maxHp, team);
+  }
+}
+
+function drawProjectile(p) {
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = p.color;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawEffects() {
+  state.effects.forEach(e => {
+    const alpha = e.timer / e.maxTimer;
+    if(e.type === 'explosion') {
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.radius*(1-alpha*0.5), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.fillStyle = e.color;
+      ctx.globalAlpha = alpha*0.2;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.radius*(1-alpha*0.5), 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else if(e.type === 'dmgNum') {
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = e.color;
+      ctx.font = `bold ${12+6*(1-alpha)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(e.text, e.x, e.y - 15*(1-alpha));
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  state.particles.forEach(p => {
+    ctx.globalAlpha = p.life/p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size*(p.life/p.maxLife), 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawDragPreview() {
+  if(!state.dragCard) return;
+  const rect = canvas.getBoundingClientRect();
+  const cx = (state.dragX - rect.left) * (W/rect.width);
+  const cy = (state.dragY - rect.top) * (H/rect.height);
+
+  // Valid placement area
+  const valid = cy > RIVER_Y + RIVER_H/2 + 10 && cy < H - 30 && cx > 25 && cx < W-25;
+  ctx.strokeStyle = valid ? 'rgba(0,255,0,0.6)' : 'rgba(255,0,0,0.6)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5,5]);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 20, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  if(valid) {
+    ctx.fillStyle = 'rgba(0,255,0,0.15)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 20, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function render() {
+  ctx.clearRect(0,0,W,H);
+  drawArena();
+  state.towers.forEach(drawTower);
+  state.troops.forEach(drawTroop);
+  state.projectiles.forEach(drawProjectile);
+  drawEffects();
+  drawDragPreview();
+
+  // Crown counters
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffd700';
+  ctx.fillText(`👑${state.crowns.ai}`, 10, 20);
+  ctx.fillText(`👑${state.crowns.player}`, 10, H-10);
+}
+
+// ============= UI =============
+function updateUI() {
+  // Timer
+  const mins = Math.floor(state.time/60);
+  const secs = Math.floor(state.time%60);
+  document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  if(state.time <= 60) document.getElementById('timer').style.color = '#ff4444';
+
+  // Elixir
+  const elixPct = (state.elixir/MAX_ELIXIR)*100;
+  document.getElementById('elixir-bar').style.width = elixPct+'%';
+  document.getElementById('elixir-text').textContent = `${Math.floor(state.elixir)}/${MAX_ELIXIR}`;
+
+  // Cards
+  renderHand();
+}
+
+function renderHand() {
+  const hand = document.getElementById('card-hand');
+  // Only rebuild if cards changed
+  const key = state.playerHand.join(',');
+  if(hand.dataset.key === key && !hand.dataset.dirty) { updateCardStates(); return; }
+  hand.dataset.key = key;
+  hand.innerHTML = '';
+  state.playerHand.forEach((cardKey, i) => {
+    const def = CARD_DEFS[cardKey];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.background = `linear-gradient(135deg, ${def.color}33, ${def.color}88)`;
+    card.innerHTML = `
+      <div class="card-cost">${def.cost}</div>
+      <div class="card-name">${def.name}</div>
+      <div class="card-icon">${def.emoji}</div>
+      <div class="card-info">${def.type==='spell'?'Spell':def.type==='ranged'?'Ranged':'Melee'}</div>
+    `;
+    card.dataset.index = i;
+    card.dataset.cardKey = cardKey;
+
+    // Drag events
+    card.addEventListener('mousedown', onCardDragStart);
+    card.addEventListener('touchstart', onCardTouchStart, {passive:false});
+    hand.appendChild(card);
+  });
+  updateCardStates();
+
+  // Next card
+  const nextContainer = document.getElementById('next-card');
+  const ndef = CARD_DEFS[state.playerNext];
+  if(ndef) {
+    nextContainer.innerHTML = `<div id="next-card-label">Next</div>
+    <div class="card" style="width:50px;height:65px;background:linear-gradient(135deg,${ndef.color}33,${ndef.color}88)">
+      <div class="card-cost" style="width:16px;height:16px;font-size:9px">${ndef.cost}</div>
+      <div class="card-icon" style="height:35px;font-size:20px">${ndef.emoji}</div>
+    </div>`;
+  }
+}
+
+function updateCardStates() {
+  document.querySelectorAll('#card-hand .card').forEach(card => {
+    const def = CARD_DEFS[card.dataset.cardKey];
+    if(def.cost > state.elixir) card.classList.add('disabled');
+    else card.classList.remove('disabled');
+  });
+}
+
+// ============= DRAG & DROP =============
+let dragCardIndex = null;
+const ghost = document.getElementById('drag-ghost');
+
+function onCardDragStart(e) {
+  const card = e.currentTarget;
+  const def = CARD_DEFS[card.dataset.cardKey];
+  if(def.cost > state.elixir) return;
+  e.preventDefault();
+  dragCardIndex = parseInt(card.dataset.index);
+  state.dragCard = card.dataset.cardKey;
+  card.classList.add('dragging');
+  ghost.style.display = 'block';
+  const gc = ghost.querySelector('canvas');
+  const gctx = gc.getContext('2d');
+  gctx.clearRect(0,0,50,50);
+  gctx.fillStyle = def.color;
+  gctx.beginPath();
+  gctx.arc(25,25,20,0,Math.PI*2);
+  gctx.fill();
+  gctx.font = '20px sans-serif';
+  gctx.textAlign = 'center';
+  gctx.fillText(def.emoji, 25, 32);
+  updateDragPos(e.clientX, e.clientY);
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+}
+
+function onCardTouchStart(e) {
+  const card = e.currentTarget;
+  const def = CARD_DEFS[card.dataset.cardKey];
+  if(def.cost > state.elixir) return;
+  e.preventDefault();
+  dragCardIndex = parseInt(card.dataset.index);
+  state.dragCard = card.dataset.cardKey;
+  card.classList.add('dragging');
+  ghost.style.display = 'block';
+  const gc = ghost.querySelector('canvas');
+  const gctx = gc.getContext('2d');
+  gctx.clearRect(0,0,50,50);
+  gctx.fillStyle = def.color;
+  gctx.beginPath(); gctx.arc(25,25,20,0,Math.PI*2); gctx.fill();
+  gctx.font='20px sans-serif'; gctx.textAlign='center'; gctx.fillText(def.emoji,25,32);
+  const touch = e.touches[0];
+  updateDragPos(touch.clientX, touch.clientY);
+  document.addEventListener('touchmove', onTouchMove, {passive:false});
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+function updateDragPos(cx, cy) {
+  state.dragX = cx; state.dragY = cy;
+  ghost.style.left = (cx-25)+'px';
+  ghost.style.top = (cy-25)+'px';
+}
+
+function onDragMove(e) { updateDragPos(e.clientX, e.clientY); }
+function onTouchMove(e) { e.preventDefault(); updateDragPos(e.touches[0].clientX, e.touches[0].clientY); }
+
+function onDragEnd(e) {
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', onDragEnd);
+  finishDrag(e.clientX, e.clientY);
+}
+function onTouchEnd(e) {
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+  const touch = e.changedTouches[0];
+  finishDrag(touch.clientX, touch.clientY);
+}
+
+function finishDrag(cx, cy) {
+  ghost.style.display = 'none';
+  document.querySelectorAll('#card-hand .card').forEach(c => c.classList.remove('dragging'));
+
+  if(dragCardIndex === null || state.dragCard === null) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const ax = (cx - rect.left) * (W/rect.width);
+  const ay = (cy - rect.top) * (H/rect.height);
+
+  const def = CARD_DEFS[state.dragCard];
+  const isSpell = def.type === 'spell';
+  const valid = isSpell ? (ay > 30 && ay < H-30 && ax > 25 && ax < W-25) :
+    (ay > RIVER_Y + RIVER_H/2 + 10 && ay < H - 30 && ax > 25 && ax < W-25);
+
+  if(valid && state.elixir >= def.cost) {
+    state.elixir -= def.cost;
+    spawnTroop(state.dragCard, ax, ay, 'player');
+    // Cycle card
+    state.playerHand[dragCardIndex] = state.playerNext;
+    if(state.playerDeck.length > 0) state.playerNext = state.playerDeck.splice(0,1)[0];
+    else { state.playerDeck = [...ALL_CARDS]; shuffle(state.playerDeck); state.playerNext = state.playerDeck.splice(0,1)[0]; }
+    document.getElementById('card-hand').dataset.dirty = '1';
+  }
+
+  state.dragCard = null;
+  dragCardIndex = null;
+}
+
+// ============= GAME LOOP =============
+function gameLoop(ts) {
+  const dt = Math.min((ts - state.lastTime)/1000, 0.05);
+  state.lastTime = ts;
+  update(dt);
+  render();
+  updateUI();
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function restartGame() {
+  document.getElementById('game-over').style.display = 'none';
+  document.getElementById('timer').style.color = '#fff';
+  document.getElementById('card-hand').dataset.key = '';
+  initState();
+}
+
+// ============= START =============
+initState();
+animFrame = requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
