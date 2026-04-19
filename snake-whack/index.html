@@ -60,10 +60,10 @@ canvas{border:2px solid rgba(108,99,255,.4);border-radius:12px;box-shadow:0 0 40
 <script>
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-const COLS = 20, ROWS = 20;
+const COLS = 14, ROWS = 14;
 const CELL = canvas.width / COLS;
 const MAX_MISS = 5;
-const MOLE_TIME = 2200; // ms mole stays up
+const MOLE_BASE_TIME = 3500; // ms mole stays up at start
 
 let snake, dir, nextDir, score, missed, mole, moleTimer, gameLoop, speed, running;
 
@@ -73,7 +73,7 @@ function init() {
   nextDir = {x:1,y:0};
   score = 0;
   missed = 0;
-  speed = 150;
+  speed = 160;
   running = true;
   spawnMole();
   updateStats();
@@ -89,12 +89,15 @@ function spawnMole() {
   } while(snake.some(s => s.x===pos.x && s.y===pos.y));
   mole = pos;
   mole.born = Date.now();
+  // Timer gets shorter as score goes up, min 1200ms
+  const moleTime = Math.max(1200, MOLE_BASE_TIME - score * 8);
+  mole.timeAllowed = moleTime;
   moleTimer = setTimeout(() => {
     missed++;
     updateStats();
     if(missed >= MAX_MISS) endGame();
     else spawnMole();
-  }, MOLE_TIME);
+  }, moleTime);
 }
 
 function tick() {
@@ -144,7 +147,7 @@ function draw() {
 
   // Mole timer bar
   const elapsed = Date.now() - mole.born;
-  const pct = 1 - (elapsed / MOLE_TIME);
+  const pct = 1 - (elapsed / (mole.timeAllowed || MOLE_BASE_TIME));
   const barW = CELL * pct;
   ctx.fillStyle = pct > 0.5 ? '#00d4ff' : pct > 0.25 ? '#f59e0b' : '#ef4444';
   ctx.fillRect(mole.x*CELL, mole.y*CELL + CELL - 4, barW, 4);
